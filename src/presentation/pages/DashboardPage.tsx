@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, FileText, Plus, ReceiptText, WalletCards } from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText, ReceiptText, WalletCards } from 'lucide-react'
 import { useState } from 'react'
 import { Sidebar, Topbar } from '../../components/navigation'
 import {
@@ -7,7 +7,6 @@ import {
   Card,
   Drawer,
   DropdownMenu,
-  Modal,
   SegmentedControl,
   StatusCheckbox,
   Table,
@@ -87,13 +86,12 @@ const operationalFlow = [
 
 export function DashboardPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('mes')
-  const [modalOpen, setModalOpen] = useState(false)
 
   return (
     <div className="app-frame" id="dashboard">
-      <Sidebar />
+      <Sidebar activeHref="#dashboard" />
       <div className="workspace">
-        <Topbar onOpenQuickAction={() => setModalOpen(true)} />
+        <Topbar />
 
         <main className="dashboard">
           <section className="dashboard__header">
@@ -101,7 +99,7 @@ export function DashboardPage() {
               <Typography as="h1" variant="pageTitle">
                 Bom dia, Gustavo.
               </Typography>
-              <Typography variant="secondary">Aqui está o resumo da sua Apple Delivery hoje.</Typography>
+              <Typography variant="secondary">Aqui está o resumo da sua revenda Apple hoje.</Typography>
             </div>
             <div className="dashboard__date">
               <strong>Segunda-feira, 15 de setembro de 2025</strong>
@@ -126,23 +124,37 @@ export function DashboardPage() {
           </section>
 
           <section className="dashboard-grid">
-            <article className="feature-panel">
-              <div className="feature-panel__content">
-                <span>Apple Delivery</span>
-                <Typography as="h2" variant="pageTitle">
-                  Tecnologia que aproxima.
-                </Typography>
-                <Typography variant="body">Controle hoje. Mais vendas amanhã.</Typography>
-                <Button iconLeft={Plus} iconRight={ArrowRight} onClick={() => setModalOpen(true)}>
+            <Card className="daily-panel">
+              <div className="section-heading">
+                <div>
+                  <Typography as="h2" variant="sectionTitle">
+                    Atalhos de operação
+                  </Typography>
+                  <Typography variant="caption">Comece pelos registros que alimentam o financeiro.</Typography>
+                </div>
+              </div>
+              <div className="daily-actions">
+                <Button iconRight={ArrowRight} onClick={() => { window.location.hash = 'vendas' }}>
                   Nova venda
                 </Button>
+                <Button variant="outline" iconRight={ArrowRight} onClick={() => { window.location.hash = 'compras' }}>
+                  Nova compra
+                </Button>
+                <Button variant="outline" iconRight={ArrowRight} onClick={() => { window.location.hash = 'clientes' }}>
+                  Novo cliente
+                </Button>
               </div>
-              <div className="feature-panel__device" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-            </article>
+              <dl className="daily-summary">
+                <div>
+                  <dt>Próximo passo</dt>
+                  <dd>Consolidar clientes e vendas reais</dd>
+                </div>
+                <div>
+                  <dt>Fonte dos números</dt>
+                  <dd>Mock até conectar os módulos</dd>
+                </div>
+              </dl>
+            </Card>
 
             <Drawer title="Minhas tarefas">
               <div className="drawer__toolbar">
@@ -234,27 +246,10 @@ export function DashboardPage() {
                   </dl>
                 </div>
               </Card>
-
-              <Card className="mini-feature">
-                <Typography as="h2" variant="sectionTitle">
-                  Estoque sempre na palma da mão.
-                </Typography>
-                <Typography variant="caption">Do iPhone ao Mac, tudo sob controle.</Typography>
-              </Card>
             </aside>
           </section>
         </main>
       </div>
-
-      <Modal open={modalOpen} title="Nova operação" onClose={() => setModalOpen(false)}>
-        <div className="quick-actions">
-          {['Nova venda', 'Nova compra', 'Novo cliente'].map((label) => (
-            <Button key={label} variant="outline" iconRight={ArrowRight}>
-              {label}
-            </Button>
-          ))}
-        </div>
-      </Modal>
     </div>
   )
 }

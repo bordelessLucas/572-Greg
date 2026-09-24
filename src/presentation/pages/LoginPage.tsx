@@ -12,24 +12,24 @@ export function LoginPage({ onNavigateRegister, onEnterDashboard }: LoginPagePro
       <section className="auth-panel" aria-labelledby="login-title">
         <div className="auth-brand">
           <span className="brand__mark" aria-hidden="true">
-            AD
+            GA
           </span>
           <div>
             <Typography as="p" variant="title">
-              Apple Delivery
+              Gestão Apple
             </Typography>
             <Typography as="p" variant="caption">
-              Mais que produtos. Conexões.
+              Controle interno da revenda.
             </Typography>
           </div>
         </div>
 
         <div className="auth-copy">
           <Typography as="h1" variant="pageTitle" className="auth-title" id="login-title">
-            Entre para continuar.
+            Acesse sua área interna.
           </Typography>
           <Typography variant="secondary">
-            Gestão comercial, financeira e operacional em um ambiente preciso.
+            Organize estoque, vendas, compras e recebimentos em um só lugar.
           </Typography>
         </div>
 
@@ -44,7 +44,7 @@ export function LoginPage({ onNavigateRegister, onEnterDashboard }: LoginPagePro
         <div className="auth-links">
           <button type="button">Esqueci minha senha</button>
           <button type="button" onClick={onNavigateRegister}>
-            Criar conta
+            Criar acesso
           </button>
         </div>
       </section>

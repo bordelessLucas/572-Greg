@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { DashboardPage } from './presentation/pages/DashboardPage'
+import { ClientsPage } from './presentation/pages/ClientsPage'
 import { LoginPage } from './presentation/pages/LoginPage'
+import { ModulePage } from './presentation/pages/ModulePage'
 import { RegisterPage } from './presentation/pages/RegisterPage'
+import { getModuleById } from './presentation/module-content'
 
-type AppView = 'login' | 'register' | 'dashboard'
+type AppView = 'login' | 'register' | 'dashboard' | string
 
 function getViewFromHash(): AppView {
   const hash = window.location.hash.replace('#', '')
 
-  if (hash === 'login' || hash === 'register' || hash === 'dashboard') {
+  if (hash === 'login' || hash === 'register' || hash === 'dashboard' || getModuleById(hash)) {
     return hash
   }
 
@@ -37,6 +40,16 @@ function App() {
 
   if (view === 'register') {
     return <RegisterPage onBackLogin={() => navigate('login')} onEnterDashboard={() => navigate('dashboard')} />
+  }
+
+  if (view === 'clientes') {
+    return <ClientsPage />
+  }
+
+  const module = getModuleById(view)
+
+  if (module) {
+    return <ModulePage module={module} />
   }
 
   return <DashboardPage />

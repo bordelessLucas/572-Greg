@@ -12,31 +12,31 @@ export function RegisterPage({ onBackLogin, onEnterDashboard }: RegisterPageProp
       <section className="auth-panel auth-panel--register" aria-labelledby="register-title">
         <div className="auth-brand">
           <span className="brand__mark" aria-hidden="true">
-            AD
+            GA
           </span>
           <div>
             <Typography as="p" variant="title">
-              Apple Delivery
+              Gestão Apple
             </Typography>
             <Typography as="p" variant="caption">
-              Cadastro comercial
+              Acesso interno
             </Typography>
           </div>
         </div>
 
         <div className="auth-copy">
           <Typography as="h1" variant="pageTitle" className="auth-title" id="register-title">
-            Configure o acesso inicial.
+            Configure o acesso do dono.
           </Typography>
           <Typography variant="secondary">
-            Dados mínimos para preparar a área operacional da revenda.
+            Dados mínimos para preparar a gestão interna da revenda.
           </Typography>
         </div>
 
         <form className="register-grid">
-          <TextInput label="Nome responsável" icon={User} placeholder="Gustavo Rehavia" required />
-          <TextInput label="Email corporativo" icon={Mail} type="email" placeholder="gustavo@empresa.com" required />
-          <TextInput label="Empresa" icon={Building2} placeholder="Apple Delivery" required />
+          <TextInput label="Nome do dono" icon={User} placeholder="Gustavo Rehavia" required />
+          <TextInput label="Email de acesso" icon={Mail} type="email" placeholder="gustavo@empresa.com" required />
+          <TextInput label="Nome da revenda" icon={Building2} placeholder="Gestão Apple" required />
           <TextInput label="Telefone" icon={Phone} placeholder="(11) 99999-0000" required />
           <SelectField
             label="Perfil inicial"
@@ -60,7 +60,7 @@ export function RegisterPage({ onBackLogin, onEnterDashboard }: RegisterPageProp
           <Button variant="ghost" onClick={onBackLogin}>
             Voltar
           </Button>
-          <Button onClick={onEnterDashboard}>Criar conta</Button>
+          <Button onClick={onEnterDashboard}>Criar acesso</Button>
         </div>
       </section>
     </main>
