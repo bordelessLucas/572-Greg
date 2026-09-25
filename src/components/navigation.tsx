@@ -23,6 +23,7 @@ import {
   WalletCards,
 } from 'lucide-react'
 import { Button, SearchField, Typography } from './ui'
+import { authService } from '../services/auth.service'
 
 export interface NavigationItem {
   label: string
@@ -243,6 +244,9 @@ export function Topbar() {
               </button>
               <button type="button" onClick={() => { window.location.hash = 'dashboard' }}>
                 Voltar ao dashboard
+              </button>
+              <button type="button" onClick={() => { void authService.signOut(); window.location.hash = 'login' }}>
+                Sair
               </button>
             </div>
           ) : null}

@@ -1,68 +1,73 @@
-import { Building2, Mail, Phone, User } from 'lucide-react'
-import { Button, SelectField, TextInput, Typography } from '../../components/ui'
+import { ArrowLeft, ShieldCheck, UserCog } from 'lucide-react'
+import { Sidebar, Topbar } from '../../components/navigation'
+import { Badge, Button, Card, Typography } from '../../components/ui'
 
 interface RegisterPageProps {
-  onBackLogin: () => void
-  onEnterDashboard: () => void
+  onBackDashboard: () => void
 }
 
-export function RegisterPage({ onBackLogin, onEnterDashboard }: RegisterPageProps) {
+export function RegisterPage({ onBackDashboard }: RegisterPageProps) {
   return (
-    <main className="auth-page auth-page--wide">
-      <section className="auth-panel auth-panel--register" aria-labelledby="register-title">
-        <div className="auth-brand">
-          <span className="brand__mark" aria-hidden="true">
-            GA
-          </span>
-          <div>
-            <Typography as="p" variant="title">
-              Gestão Apple
-            </Typography>
-            <Typography as="p" variant="caption">
-              Acesso interno
-            </Typography>
-          </div>
-        </div>
+    <div className="app-frame" id="register">
+      <Sidebar activeHref="#configuracoes" />
+      <div className="workspace">
+        <Topbar />
 
-        <div className="auth-copy">
-          <Typography as="h1" variant="pageTitle" className="auth-title" id="register-title">
-            Configure o acesso do dono.
-          </Typography>
-          <Typography variant="secondary">
-            Dados mínimos para preparar a gestão interna da revenda.
-          </Typography>
-        </div>
+        <main className="module-page">
+          <section className="module-hero">
+            <div className="module-hero__copy">
+              <Badge tone="accent">Configuracoes</Badge>
+              <Typography as="h1" variant="pageTitle">
+                Acesso do administrador
+              </Typography>
+              <Typography variant="secondary">
+                O sistema e privado. Novos acessos nao podem ser criados pela tela publica de login.
+              </Typography>
+            </div>
+            <Card className="module-stage-card">
+              <Typography as="h2" variant="sectionTitle">
+                Regra atual
+              </Typography>
+              <Typography variant="caption">
+                MVP com um unico admin. Criacao, troca ou recuperacao de acesso deve ser tratada como configuracao interna.
+              </Typography>
+              <Button iconLeft={ArrowLeft} onClick={onBackDashboard}>
+                Voltar ao dashboard
+              </Button>
+            </Card>
+          </section>
 
-        <form className="register-grid">
-          <TextInput label="Nome do dono" icon={User} placeholder="Gustavo Rehavia" required />
-          <TextInput label="Email de acesso" icon={Mail} type="email" placeholder="gustavo@empresa.com" required />
-          <TextInput label="Nome da revenda" icon={Building2} placeholder="Gestão Apple" required />
-          <TextInput label="Telefone" icon={Phone} placeholder="(11) 99999-0000" required />
-          <SelectField
-            label="Perfil inicial"
-            options={[
-              { label: 'Administrador', value: 'admin' },
-              { label: 'Financeiro', value: 'finance' },
-              { label: 'Operação', value: 'operations' },
-            ]}
-          />
-          <SelectField
-            label="Unidade"
-            options={[
-              { label: 'Matriz', value: 'main' },
-              { label: 'Loja', value: 'store' },
-              { label: 'Escritório', value: 'office' },
-            ]}
-          />
-        </form>
+          <section className="module-grid">
+            <Card className="module-card">
+              <div className="module-card__heading">
+                <ShieldCheck size={18} aria-hidden="true" />
+                <Typography as="h2" variant="sectionTitle">
+                  O que esta fechado
+                </Typography>
+              </div>
+              <ul className="module-list">
+                <li>Login publico apenas para administrador existente.</li>
+                <li>Nao existe auto cadastro para usuarios externos.</li>
+                <li>Modulos internos so abrem apos sessao autenticada.</li>
+              </ul>
+            </Card>
 
-        <div className="register-actions">
-          <Button variant="ghost" onClick={onBackLogin}>
-            Voltar
-          </Button>
-          <Button onClick={onEnterDashboard}>Criar acesso</Button>
-        </div>
-      </section>
-    </main>
+            <Card className="module-card">
+              <div className="module-card__heading">
+                <UserCog size={18} aria-hidden="true" />
+                <Typography as="h2" variant="sectionTitle">
+                  Proxima evolucao
+                </Typography>
+              </div>
+              <ul className="module-list module-list--muted">
+                <li>Adicionar tela interna em Configuracoes para trocar email/senha do admin.</li>
+                <li>Se o cliente pedir, avaliar multiplos usuarios apos o MVP.</li>
+                <li>Regras Firestore devem permitir dados apenas para usuario autenticado.</li>
+              </ul>
+            </Card>
+          </section>
+        </main>
+      </div>
+    </div>
   )
 }

@@ -1,5 +1,5 @@
-import { ArrowRight, IdCard, Pencil, Phone, Save, User } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowRight, IdCard, Mail, MapPin, Pencil, Phone, Save, User } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Sidebar, Topbar } from '../../components/navigation'
 import { Button, Card, Modal, Table, TextInput, Typography } from '../../components/ui'
@@ -10,17 +10,43 @@ const emptyForm: ClientInput = {
   name: '',
   phone: '',
   cpf: '',
+  email: '',
+  address: '',
   referredByClientId: '',
   notes: '',
 }
 
 export function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>(() => clientService.list())
+  const [clients, setClients] = useState<Client[]>([])
   const [form, setForm] = useState<ClientInput>(emptyForm)
   const [editingId, setEditingId] = useState<string | undefined>()
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
+
+  const loadClients = async () => {
+    setLoading(true)
+    setLoadError('')
+
+    try {
+      setClients(await clientService.list())
+    } catch {
+      setLoadError('Nao foi possivel carregar os clientes do Firestore.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const loadTask = window.setTimeout(() => {
+      void loadClients()
+    }, 0)
+
+    return () => window.clearTimeout(loadTask)
+  }, [])
 
   const filteredClients = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -30,7 +56,9 @@ export function ClientsPage() {
     }
 
     return clients.filter((client) =>
-      [client.name, client.phone, client.cpf].some((value) => value.toLowerCase().includes(normalizedQuery)),
+      [client.name, client.phone, client.cpf, client.email].some((value) =>
+        value?.toLowerCase().includes(normalizedQuery),
+      ),
     )
   }, [clients, query])
 
@@ -57,30 +85,36 @@ export function ClientsPage() {
     resetForm()
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!form.name.trim() || !form.phone.trim() || !form.cpf.trim()) {
-      setError('Preencha nome, telefone e CPF para salvar o cliente.')
+    if (!form.name.trim()) {
+      setError('Preencha pelo menos o nome para salvar o cliente.')
       return
     }
 
-    if (availableReferrers.length > 0 && !form.referredByClientId) {
-      setError('Selecione o cliente que fez a indicação.')
-      return
-    }
+    setSaving(true)
+    setError('')
 
-    clientService.save(form, editingId)
-    setClients(clientService.list())
-    closeModal()
+    try {
+      await clientService.save(form, editingId)
+      await loadClients()
+      closeModal()
+    } catch {
+      setError('Nao foi possivel salvar o cliente no Firestore.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const editClient = (client: Client) => {
     setEditingId(client.id)
     setForm({
       name: client.name,
-      phone: client.phone,
-      cpf: client.cpf,
+      phone: client.phone ?? '',
+      cpf: client.cpf ?? '',
+      email: client.email ?? '',
+      address: client.address ?? '',
       referredByClientId: client.referredByClientId ?? '',
       notes: client.notes ?? '',
     })
@@ -95,27 +129,27 @@ export function ClientsPage() {
       render: (client: Client) => (
         <>
           <strong>{client.name}</strong>
-          <small>{client.notes || 'Sem observações'}</small>
+          <small>{client.notes || client.email || 'Dados adicionais opcionais'}</small>
         </>
       ),
     },
     {
       key: 'phone',
       header: 'Telefone',
-      render: (client: Client) => client.phone,
+      render: (client: Client) => client.phone || 'Opcional',
     },
     {
       key: 'cpf',
       header: 'CPF',
-      render: (client: Client) => client.cpf,
+      render: (client: Client) => client.cpf || 'Opcional',
     },
     {
       key: 'referral',
-      header: 'Indicação',
+      header: 'Indicacao',
       render: (client: Client) => {
         const referrer = clients.find((item) => item.id === client.referredByClientId)
 
-        return referrer ? referrer.name : 'Cadastro inicial'
+        return referrer ? referrer.name : 'Sem indicacao'
       },
     },
     {
@@ -143,7 +177,7 @@ export function ClientsPage() {
                 Clientes
               </Typography>
               <Typography variant="secondary">
-                Cadastre clientes com dados suficientes para vendas, parcelas, contratos e indicações.
+                Cadastre clientes com dados suficientes para vendas, parcelas, contratos e indicacoes.
               </Typography>
             </div>
             <div className="clients-header__actions">
@@ -162,7 +196,7 @@ export function ClientsPage() {
               <strong data-tone="accent">{clients.length}</strong>
             </Card>
             <Card className="module-metric">
-              <Typography variant="caption">Com indicação</Typography>
+              <Typography variant="caption">Com indicacao</Typography>
               <strong data-tone="success">{referralCount}</strong>
             </Card>
           </section>
@@ -174,23 +208,25 @@ export function ClientsPage() {
                   <Typography as="h2" variant="sectionTitle">
                     Base de clientes
                   </Typography>
-                  <Typography variant="caption">Lista persistida neste navegador até conectar o banco definitivo.</Typography>
+                  <Typography variant="caption">Lista persistida no Firestore para uso do administrador.</Typography>
                 </div>
               </div>
+
+              {loadError ? <span className="field__message field__message--error">{loadError}</span> : null}
 
               <TextInput
                 label="Buscar cliente"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Nome, telefone ou CPF"
+                placeholder="Nome, telefone, CPF ou email"
               />
 
               <Table
                 columns={clientColumns}
-                emptyDescription="Cadastre o primeiro cliente para liberar vendas, parcelas, contratos e indicações."
-                emptyTitle="Nenhum cliente cadastrado"
+                emptyDescription={loading ? 'Carregando clientes...' : 'Cadastre o primeiro cliente para liberar vendas, parcelas, contratos e indicacoes.'}
+                emptyTitle={loading ? 'Carregando base' : 'Nenhum cliente cadastrado'}
                 getRowKey={(client) => client.id}
-                rows={filteredClients}
+                rows={loading ? [] : filteredClients}
               />
             </Card>
           </section>
@@ -199,7 +235,7 @@ export function ClientsPage() {
 
       <Modal open={modalOpen} title={editingId ? 'Editar cliente' : 'Novo cliente'} onClose={closeModal}>
         <form className="client-form" noValidate onSubmit={handleSubmit}>
-          <Typography variant="caption">Esses dados serão reutilizados em vendas, cobranças e contratos.</Typography>
+          <Typography variant="caption">Dados extras ficam opcionais ate a validacao final com o cliente.</Typography>
           <TextInput
             label="Nome completo"
             icon={User}
@@ -213,7 +249,6 @@ export function ClientsPage() {
             value={form.phone}
             onChange={(event) => updateField('phone', event.target.value)}
             placeholder="(11) 99999-0000"
-            required
           />
           <TextInput
             label="CPF"
@@ -221,7 +256,13 @@ export function ClientsPage() {
             value={form.cpf}
             onChange={(event) => updateField('cpf', event.target.value)}
             placeholder="000.000.000-00"
-            required
+          />
+          <TextInput
+            label="Email"
+            icon={Mail}
+            value={form.email}
+            onChange={(event) => updateField('email', event.target.value)}
+            placeholder="cliente@email.com"
           />
 
           <label className="field" htmlFor="referred-by">
@@ -231,11 +272,10 @@ export function ClientsPage() {
                 id="referred-by"
                 value={form.referredByClientId}
                 onChange={(event) => updateField('referredByClientId', event.target.value)}
-                required={availableReferrers.length > 0}
                 disabled={availableReferrers.length === 0}
               >
                 <option value="">
-                  {availableReferrers.length > 0 ? 'Selecione um cliente' : 'Primeiro cliente da base'}
+                  {availableReferrers.length > 0 ? 'Selecione se houver indicacao' : 'Sem outros clientes na base'}
                 </option>
                 {availableReferrers.map((client) => (
                   <option key={client.id} value={client.id}>
@@ -244,21 +284,30 @@ export function ClientsPage() {
                 ))}
               </select>
             </span>
-            <span className="field__message">
-              {availableReferrers.length > 0
-                ? 'Obrigatório para registrar a origem da indicação.'
-                : 'Após o primeiro cadastro, este campo passa a ser obrigatório.'}
+            <span className="field__message">Opcional para registrar a origem da indicacao.</span>
+          </label>
+
+          <label className="field" htmlFor="client-address">
+            <span className="field__label">Endereco</span>
+            <span className="field__control field__control--textarea">
+              <MapPin size={16} aria-hidden="true" />
+              <textarea
+                id="client-address"
+                value={form.address}
+                onChange={(event) => updateField('address', event.target.value)}
+                placeholder="Endereco usado futuramente em contratos ou entregas"
+              />
             </span>
           </label>
 
           <label className="field" htmlFor="client-notes">
-            <span className="field__label">Observações</span>
+            <span className="field__label">Observacoes</span>
             <span className="field__control field__control--textarea">
               <textarea
                 id="client-notes"
                 value={form.notes}
                 onChange={(event) => updateField('notes', event.target.value)}
-                placeholder="Preferências, histórico ou contexto comercial"
+                placeholder="Preferencias, historico ou contexto comercial"
               />
             </span>
           </label>
@@ -266,8 +315,8 @@ export function ClientsPage() {
           {error ? <span className="field__message field__message--error">{error}</span> : null}
 
           <div className="client-form__actions">
-            <Button type="submit" iconLeft={Save}>
-              {editingId ? 'Salvar alterações' : 'Salvar cliente'}
+            <Button type="submit" iconLeft={Save} loading={saving}>
+              {editingId ? 'Salvar alteracoes' : 'Salvar cliente'}
             </Button>
             <Button type="button" variant="ghost" onClick={closeModal}>
               Cancelar

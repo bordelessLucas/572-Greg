@@ -276,3 +276,8 @@ Antes de considerar uma tela concluída, verifique:
 - Consistência com tokens.
 
 O build passando não conclui uma tela. Rode o app, gere screenshots quando Playwright estiver disponível, revise visualmente, e faça uma rodada de refinamento.
+## Regra para cards de metrica
+
+- Icones de KPI devem usar gradiente do accent laranja para preto, com pictograma branco.
+- Nao use azul ou outra cor fria como fundo principal de icone de KPI.
+- Estados de atencao devem aparecer no texto, badge ou indicador secundario.

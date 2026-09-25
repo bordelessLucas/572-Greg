@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore'
 import { firebaseDb } from './firebase'
 
-type EntityData = Record<string, unknown>
+type EntityData = object
 
 const createConverter = <TEntity extends EntityData>(): FirestoreDataConverter<TEntity> => ({
   toFirestore: (value: TEntity) => value,
